@@ -39,6 +39,7 @@ class Order {
 public class CustomExample {
     public static void main(String[] args) {
 
+        //Define lista de productos
         List<Order> orders = Arrays.asList(
                 new Order("Producto A", 5, 50.0),
                 new Order("Producto B", 1, 30.0),
@@ -46,6 +47,7 @@ public class CustomExample {
                 new Order("Producto C", 3, 20.0)
         );
 
+        //Estos son los parámetros de validación
         int cantidadMinima = 5;
         String producto = "Producto A";
 
