@@ -39,11 +39,6 @@ class Order {
 public class CustomExample {
     public static void main(String[] args) {
 
-        //Vamos a revisar el número mínimo de pedidos
-        //Podemos catalogar aquellos cuya cantidad sea mayor a 5 Y de un producto específico
-
-
-        //Determina una lista de órdenes
         List<Order> orders = Arrays.asList(
                 new Order("Producto A", 5, 50.0),
                 new Order("Producto B", 1, 30.0),
@@ -51,14 +46,12 @@ public class CustomExample {
                 new Order("Producto C", 3, 20.0)
         );
 
-        //Define variables delimitadoras
         int cantidadMinima = 5;
         String producto = "Producto A";
 
         // Procesar flujo de pedidos
         Flux<Order> ordersFlux = Flux.fromIterable(orders)
                 .flatMap(order -> {
-                    // Aplicar condición con flatMap
                     if (order.getQuantity() > cantidadMinima) {
                         return Flux.just(order);
                     } else {
@@ -67,20 +60,19 @@ public class CustomExample {
                 });
 
         // Validar si el flujo está vacío
-        Flux<String> result = ordersFlux
+        ordersFlux
                 .map(Order::toString)
-                .mergeWith(Flux.just("No hay órdenes de cantidad mayor a " + cantidadMinima + " para " + producto + "."))
-                .zipWith(Flux.range(1, orders.size()), (order, index) -> index <= orders.size() - 1 ? order : "Ninguna orden cumple los criterios.")
-                .distinct();
+                .zipWith(Flux.range(1, orders.size()), (order, index) -> order)
+                .switchIfEmpty(Flux.just("Ninguna orden cumple los criterios."))
+                .distinct()
+                .subscribe(System.out::println);
 
-        result.subscribe(System.out::println);
-
-        //Esto se ejecuta cumpliendo las condiciones o no.
-        //Es un reporte de ventas para el producto indicado
+        // Reporte de ventas para el producto indicado
+        // Se despliega en cualquier caso
         Observable.fromIterable(orders)
-                .filter(order -> producto.equals(order.getProduct())) // Filtrar por Producto delimitador
-                .map(order -> order.getQuantity() * order.getPrice()) // Calcular el total
-                .reduce(Double::sum) // Calcular el total de ventas
+                .filter(order -> producto.equals(order.getProduct()))
+                .map(order -> order.getQuantity() * order.getPrice())
+                .reduce(Double::sum)
                 .subscribe(total -> System.out.println("Ventas totales para " + producto + ": $" + total));
     }
 }
